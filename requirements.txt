@@ -1,0 +1,17 @@
+# Core ML Libraries
+torch
+torchvision
+torchaudio
+scikit-learn
+numpy
+pandas
+
+# Text Processing
+transformers
+sentence-transformers # For cosine similarity on embeddings
+
+# Utilities
+pyyaml        # For reading .yaml config files
+tqdm          # For progress bars
+matplotlib    # For plotting
+seaborn       # For prettier plots
