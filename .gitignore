@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.env
+
+# Data and Results
+data/
+results/checkpoints/
+results/logs/
+*.csv
+*.gz
+
+# IDE and OS specific
+.vscode/
+.idea/
+.DS_Store
+*.swo
+*.swp
+
+# Jupyter Notebooks
+.ipynb_checkpoints
