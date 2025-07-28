@@ -24,6 +24,7 @@ def greedy_direct_subset(X, y, k):
             if len(I_plus) < d:
                 w_I = np.linalg.pinv(X_I) @ y_I
             else:
+                # (X_I^T X_I)^-1 X_I^T Y_I
                 w_I = np.linalg.solve(X_I.T @ X_I, X_I.T @ y_I)
             err = np.linalg.norm(w_full - w_I)
             if err < best_err:
