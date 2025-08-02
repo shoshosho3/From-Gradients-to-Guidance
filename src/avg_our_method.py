@@ -148,7 +148,7 @@ def run_active_learning_seed(seed, margin, lambda_rank):
 
 
 # 1) Put here the seeds from the random
-seeds = [3991278080, 2601738551, 1668541524, 1540884245, 1304759236]
+seeds = []
 
 # 100 labeled →  avg acc = 0.2380
 #   150 labeled →  avg acc = 0.3406
