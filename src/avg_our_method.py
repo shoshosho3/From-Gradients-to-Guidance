@@ -13,10 +13,9 @@ num_classes = 10
 initial_labeled = 100
 query_size = 50
 batch_size = 32
-lambda_rank = 0.001
-margin = 0.1
-num_epochs = 5
-num_rounds = 5
+num_epochs = 20
+num_rounds = 20
+
 
 def set_seeds(seed):
     random.seed(seed)
@@ -24,9 +23,9 @@ def set_seeds(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    torch.use_deterministic_algorithms(True)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+
 
 # Data & model definitions (unchanged)
 transform = transforms.Compose([
@@ -34,8 +33,9 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 full_train = datasets.CIFAR10(root="~/data", train=True, download=True, transform=transform)
-test_set   = datasets.CIFAR10(root="~/data", train=False, download=True, transform=transform)
+test_set = datasets.CIFAR10(root="~/data", train=False, download=True, transform=transform)
 val_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=0)
+
 
 class ActiveLearningModel(nn.Module):
     def __init__(self, num_classes):
@@ -44,14 +44,16 @@ class ActiveLearningModel(nn.Module):
         self.features = nn.Sequential(*list(backbone.children())[:-1])
         self.feature_dim = backbone.fc.in_features
         self.cls_head = nn.Linear(self.feature_dim, num_classes)
-        self.up_head  = nn.Sequential(
+        self.up_head = nn.Sequential(
             nn.Linear(self.feature_dim, 256),
             nn.ReLU(),
             nn.Linear(256, 1)
         )
+
     def forward(self, x):
         f = self.features(x).view(x.size(0), -1)
         return self.cls_head(f), self.up_head(f).squeeze(1)
+
 
 def compute_true_grad_norm(model, x, y, criterion):
     model.zero_grad()
@@ -59,7 +61,8 @@ def compute_true_grad_norm(model, x, y, criterion):
     loss = criterion(logits, y.unsqueeze(0))
     params = list(model.features.parameters()) + list(model.cls_head.parameters())
     grads = torch.autograd.grad(loss, params, retain_graph=False)
-    return torch.sqrt(sum((g**2).sum() for g in grads))
+    return torch.sqrt(sum((g ** 2).sum() for g in grads))
+
 
 def evaluate(model, loader):
     model.eval()
@@ -73,13 +76,14 @@ def evaluate(model, loader):
             total += y.size(0)
     return correct / total
 
+
 # Run one full active‑learning experiment for a given seed
-def run_active_learning_seed(seed):
+def run_active_learning_seed(seed, margin, lambda_rank):
     set_seeds(seed)
     # 1. split
     indices = list(range(len(full_train)))
     random.shuffle(indices)
-    labeled   = indices[:initial_labeled].copy()
+    labeled = indices[:initial_labeled].copy()
     unlabeled = indices[initial_labeled:].copy()
 
     results = []
@@ -104,9 +108,9 @@ def run_active_learning_seed(seed):
                 ])
                 idx_perm = torch.randperm(len(true_norms))
                 ranking_loss = sum(
-                    F.relu(-torch.sign(true_norms[a]-true_norms[b])*(pred_update[a]-pred_update[b]) + margin)
+                    F.relu(-torch.sign(true_norms[a] - true_norms[b]) * (pred_update[a] - pred_update[b]) + margin)
                     for a, b in zip(idx_perm[::2], idx_perm[1::2])
-                ) / (len(true_norms)//2)
+                ) / (len(true_norms) // 2)
 
                 loss = loss_cls + lambda_rank * ranking_loss
                 optimizer.zero_grad()
@@ -130,20 +134,34 @@ def run_active_learning_seed(seed):
                 for i, score in enumerate(preds):
                     global_idx = unlabeled[start + i]
                     scores.append((score.item(), global_idx))
-        scores.sort(key=lambda t: -t[0])
-        new = [idx for _, idx in scores[:query_size]]
-
+        scores.sort(key=lambda t: t[0])
+        discard = int(0.1 * len(scores))
+        candidates = scores[discard:]
+        selected = random.sample(
+            candidates,
+            k=min(query_size, len(candidates))
+        )
+        new = [idx for _, idx in selected]
         labeled.extend(new)
         unlabeled = [i for i in unlabeled if i not in new]
-
     return results
 
+
 # 1) Put here the seeds from the random
-seeds = []
+seeds = [3991278080, 2601738551, 1668541524, 1540884245, 1304759236]
 
-
+# 100 labeled →  avg acc = 0.2380
+#   150 labeled →  avg acc = 0.3406
+#   200 labeled →  avg acc = 0.3974
+#   250 labeled →  avg acc = 0.4327
+#   300 labeled →  avg acc = 0.4840
 # 2) Run experiments
-all_results = [run_active_learning_seed(s) for s in seeds]
+
+
+# 4) Print
+print("\nAverage accuracy over seeds at each round:")
+lambda_rank, margin = 0.01, 0.1
+all_results = [run_active_learning_seed(s, margin=margin, lambda_rank=lambda_rank) for s in seeds]
 
 # 3) Compute average accuracy at each round
 avg_results = []
@@ -152,18 +170,24 @@ for round_idx in range(num_rounds):
     mean_acc = np.mean([res[round_idx][1] for res in all_results])
     avg_results.append((n_labeled, mean_acc))
 
-# 4) Print
-print("\nAverage accuracy over seeds at each round:")
-for n, acc in avg_results:
-    print(f"  {n:3d} labeled →  avg acc = {acc:.4f}")
+output_path = f"avg_results_lr{lambda_rank}_m{margin}.txt"
+with open(output_path, "w") as f:
+    for n, acc in avg_results:
+        line = f"  {n:3d} labeled →  avg acc = {acc:.4f}\n"
+        print(line, end="")  # still prints to stdout
+        f.write(line)  # writes the same line to the file
 
+print(f"\nSaved results to {output_path}")
+
+xs_, ys_ = [100, 150, 200, 250, 300], [0.238, 0.3406, 0.3974, 0.4327, 0.484]
 # 5) (Optional) Plot
 plt.figure()
 xs, ys = zip(*avg_results)
 plt.plot(xs, ys, marker='s', label='Avg over 5 seeds')
+plt.plot(xs_, ys_, marker='s', label='Random over 5 seeds')
 plt.xlabel("Number of labeled samples")
-(plt.
- ylabel("Validation accuracy"))
+plt.ylabel("Validation accuracy")
+plt.savefig('figure')
 plt.title("Active Learning (average over 5 seeds)")
 plt.legend()
 plt.show()

@@ -15,8 +15,8 @@ query_size = 50
 batch_size = 32
 lambda_rank = 0.001
 margin = 0.1
-num_epochs = 5
-num_rounds = 5
+num_epochs = 20
+num_rounds = 20
 
 def set_seeds(seed):
     random.seed(seed)
@@ -24,7 +24,6 @@ def set_seeds(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    torch.use_deterministic_algorithms(True)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
@@ -75,6 +74,7 @@ def evaluate(model, loader):
 
 # Run one full active‑learning experiment for a given seed
 def run_active_learning_seed(seed):
+    print(seed)
     set_seeds(seed)
     # 1. split
     indices = list(range(len(full_train)))
@@ -123,7 +123,9 @@ def run_active_learning_seed(seed):
         unlabeled = [i for i in unlabeled if i not in new]
 
     return results
+# The seeds: [3991278080, 2601738551, 1668541524, 1540884245, 1304759236]
 
+# For 20 rounds [2640784850, 1109079710, 3979830668, 3584985825, 4100005416]
 # 1) Generate 5 random 32‑bit seeds
 seeds = [random.getrandbits(32) for _ in range(5)]
 print("Using seeds (use this seeds from now on):", seeds)
@@ -148,8 +150,7 @@ plt.figure()
 xs, ys = zip(*avg_results)
 plt.plot(xs, ys, marker='s', label='Avg over 5 seeds')
 plt.xlabel("Number of labeled samples")
-(plt.
- ylabel("Validation accuracy"))
+plt.ylabel("Validation accuracy")
 plt.title("Active Learning (average over 5 seeds)")
 plt.legend()
 plt.show()
