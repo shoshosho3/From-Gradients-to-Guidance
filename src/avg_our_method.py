@@ -9,12 +9,7 @@ import numpy as np
 
 # Configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-num_classes = 10
-initial_labeled = 100
-query_size = 50
 batch_size = 32
-num_epochs = 20
-num_rounds = 20
 
 
 def set_seeds(seed):
@@ -78,7 +73,9 @@ def evaluate(model, loader):
 
 
 # Run one full active‑learning experiment for a given seed
-def run_active_learning_seed(seed, margin, lambda_rank):
+
+def run_active_learning_seed(seed, margin, lambda_rank, num_classes, initial_labeled=100, query_size=50,
+                             batch_size=32, num_epochs=5, num_rounds=20):
     set_seeds(seed)
     # 1. split
     indices = list(range(len(full_train)))
@@ -148,7 +145,7 @@ def run_active_learning_seed(seed, margin, lambda_rank):
 
 
 # 1) Put here the seeds from the random
-seeds = []
+seeds = [1]
 
 # 100 labeled →  avg acc = 0.2380
 #   150 labeled →  avg acc = 0.3406
@@ -157,11 +154,17 @@ seeds = []
 #   300 labeled →  avg acc = 0.4840
 # 2) Run experiments
 
-
+num_classes = 10
+initial_labeled = 100
+query_size = 50
+num_epochs = 20
+num_rounds = 20
 # 4) Print
 print("\nAverage accuracy over seeds at each round:")
 lambda_rank, margin = 0.01, 0.1
-all_results = [run_active_learning_seed(s, margin=margin, lambda_rank=lambda_rank) for s in seeds]
+all_results = [run_active_learning_seed(s, margin=margin, lambda_rank=lambda_rank, num_classes=num_classes,
+                                        initial_labeled=initial_labeled, query_size=query_size, batch_size=batch_size,
+                                        num_epochs=num_epochs, num_rounds=num_rounds) for s in seeds]
 
 # 3) Compute average accuracy at each round
 avg_results = []
