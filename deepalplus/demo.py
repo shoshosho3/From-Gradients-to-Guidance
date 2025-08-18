@@ -34,8 +34,10 @@ os.environ["CUDA_VISIBLE_DEVICES"] = str(args_input.gpu)
 # fix random seed
 np.random.seed(SEED)
 torch.manual_seed(SEED)
-torch.backends.cudnn.enabled  = True
-torch.backends.cudnn.benchmark= True
+torch.backends.cudnn.enabled=True
+torch.backends.cudnn.benchmark=False
+torch.backends.cudnn.deterministic=True
+
 
 # device
 use_cuda = torch.cuda.is_available()
