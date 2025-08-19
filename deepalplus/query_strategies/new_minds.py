@@ -15,6 +15,9 @@ class ActiveLearningModel(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         backbone = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+
+        backbone.conv1 = nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+
         self.features = nn.Sequential(*list(backbone.children())[:-1])
         self.feature_dim = backbone.fc.in_features
         self.cls_head = nn.Linear(self.feature_dim, num_classes)
