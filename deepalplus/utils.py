@@ -270,7 +270,7 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 	elif STRATEGY_NAME == 'WAAL':
 		return WAAL(dataset, net, args_input, args_task)
         elif STRATEGY_NAME == 'Minds':
-            return Minds(dataset, net, args_input, args_task)
+                return Minds(dataset, net, args_input, args_task)
 	else:
 		raise NotImplementedError
 
