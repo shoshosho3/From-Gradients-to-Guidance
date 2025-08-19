@@ -44,12 +44,20 @@ class Minds(Strategy):
 
     def _compute_true_grad_norm(self, x, y, criterion):
         """Computes the true gradient norm for a single sample."""
+        # FIX: Temporarily switch to eval mode to handle batch norm with a batch size of 1.
+        # Store the original training state of the model.
+        is_training = self.model.training
+        self.model.eval()
+
         self.model.zero_grad()
         logits, _ = self.model(x.unsqueeze(0))
         loss = criterion(logits, y.unsqueeze(0))
 
         params = list(self.model.features.parameters()) + list(self.model.cls_head.parameters())
         grads = torch.autograd.grad(loss, params, retain_graph=False)
+
+        # Restore the model's original training state.
+        self.model.train(is_training)
 
         # Calculate the squared sum of gradients and return the square root.
         return torch.sqrt(sum((g.detach() ** 2).sum() for g in grads))
