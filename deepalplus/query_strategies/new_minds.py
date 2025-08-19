@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, Subset
 import random
-from strategy import Strategy
+from .strategy import Strategy
 
 # Use CUDA if available, otherwise CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
