@@ -37,13 +37,13 @@ class Minds(Strategy):
         super().__init__(dataset, net, args_input, args_task)
 
         # Hyperparameters from the provided script, fetched from args
-        self.margin = self.args_task.get('margin', 0.1)
-        self.lambda_rank = self.args_task.get('lambda_rank', 0.01)
-        self.num_epochs = self.args_input.get('epochs', 20)
-        self.batch_size = self.args_input.get('batch_size', 32)
-        self.lr = self.args_input.get('lr', 1e-3)
-        self.momentum = self.args_task.get('momentum', 0.9)
-        self.discard_ratio = self.args_task.get('discard_ratio', 0.1)
+        self.margin = 0.1
+        self.lambda_rank = 0.01
+        self.num_epochs = 20
+        self.batch_size = 32
+        self.lr = 1e-3
+        self.momentum = 0.9
+        self.discard_ratio = 0.1
 
     def _compute_true_grad_norm(self, x, y, criterion):
         """
