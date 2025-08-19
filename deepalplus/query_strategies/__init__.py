@@ -20,3 +20,5 @@ from .ceal import CEALSampling
 from .loss_prediction import LossPredictionLoss
 from .vaal import VAAL
 from .waal import WAAL
+
+from .new_minds import Minds

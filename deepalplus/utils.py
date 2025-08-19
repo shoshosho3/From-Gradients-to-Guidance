@@ -9,7 +9,7 @@ from query_strategies import RandomSampling, LeastConfidence, MarginSampling, En
 								LeastConfidenceDropout, MarginSamplingDropout, EntropySamplingDropout, \
 								KMeansSampling, KMeansSamplingGPU, KCenterGreedy, KCenterGreedyPCA, BALDDropout,  \
 								AdversarialBIM, AdversarialDeepFool, VarRatio, MeanSTD, BadgeSampling, CEALSampling, \
-								LossPredictionLoss, VAAL, WAAL
+								LossPredictionLoss, VAAL, WAAL, Minds
 from parameters import *
 from torchvision import transforms
 import sys
@@ -269,10 +269,10 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 		return VAAL(dataset, net, args_input, args_task, net_vae = net_vae, net_dis = net_disc, handler_joint = handler_joint)
 	elif STRATEGY_NAME == 'WAAL':
 		return WAAL(dataset, net, args_input, args_task)
+    elif STRATEGY_NAME == 'Minds':
+        return Minds(dataset, net, args_input, args_task)
 	else:
 		raise NotImplementedError
-
-
 
 
 #other stuffs
