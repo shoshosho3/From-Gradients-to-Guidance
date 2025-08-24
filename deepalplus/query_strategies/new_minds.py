@@ -28,7 +28,7 @@ class Minds_Net_Backend(nn.Module):
             nn.Linear(self.feature_dim, 256),
             nn.ReLU(),
             nn.Linear(256, 1)
-        )
+        ) 
 
     def forward(self, x):
         f = self.features(x).view(x.size(0), -1)
@@ -138,25 +138,45 @@ class Minds(Strategy):
         labeled_idxs, labeled_data = self.dataset.get_labeled_data()
         self.net.train(labeled_data)
 
+    # def query(self, n):
+    #     """Query new points based on the predicted update magnitude."""
+    #     unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
+
+    #     # Use the network to get scores
+    #     pred_updates = self.net.predict_update_scores(unlabeled_data)
+    #     scores = list(zip(pred_updates.numpy(), unlabeled_idxs))
+
+    #     # Sort by score (ascending)
+    #     scores.sort(key=lambda t: t[0])
+
+    #     # Discard 10% of samples with the lowest scores
+    #     discard = int(0.1 * len(scores))
+    #     candidates = scores[discard:]
+
+    #     # Randomly sample 'n' points from the remaining high-score candidates
+    #     selected = random.sample(candidates, k=min(n, len(candidates)))
+
+    #     return [idx for _, idx in selected]
+
+    # --------- fix attempt ---------
     def query(self, n):
         """Query new points based on the predicted update magnitude."""
         unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
-
-        # Use the network to get scores
+        
+        # Use the network to get scores for all unlabeled points
         pred_updates = self.net.predict_update_scores(unlabeled_data)
+        
+        # Combine scores with their original indices
         scores = list(zip(pred_updates.numpy(), unlabeled_idxs))
 
-        # Sort by score (ascending)
-        scores.sort(key=lambda t: t[0])
-
-        # Discard 10% of samples with the lowest scores
-        discard = int(0.1 * len(scores))
-        candidates = scores[discard:]
-
-        # Randomly sample 'n' points from the remaining high-score candidates
-        selected = random.sample(candidates, k=min(n, len(candidates)))
-
-        return [idx for _, idx in selected]
+        # FIX 1: Sort by score in descending order (highest score first)
+        scores.sort(key=lambda t: t[0], reverse=True)
+        
+        # FIX 2: Greedily select the top 'n' samples
+        selected_indices = [idx for score, idx in scores[:n]]
+        
+        return selected_indices
+    
 
     def predict(self, data):
         """Make predictions using the trained model."""
