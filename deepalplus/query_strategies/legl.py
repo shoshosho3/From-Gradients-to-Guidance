@@ -154,7 +154,7 @@ class LEGL(Strategy):
 
 # R-LEGL Strategy. Introduces randomness
 class RLEGL(Strategy):
-    def __init__(self, dataset, net, args_input, args_task, factor=5):
+    def __init__(self, dataset, net, args_input, args_task, factor=1):
         super(RLEGL, self).__init__(dataset, net, args_input, args_task)
         self.factor = factor
 

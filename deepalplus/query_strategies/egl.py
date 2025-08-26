@@ -146,7 +146,7 @@ class EGL(Strategy):
 
 # R-EGL Strategy. Introduces randomness
 class REGL(Strategy):
-    def __init__(self, dataset, net, args_input, args_task, factor=5):
+    def __init__(self, dataset, net, args_input, args_task, factor=1):
         super(REGL, self).__init__(dataset, net, args_input, args_task)
         self.factor = factor
 
