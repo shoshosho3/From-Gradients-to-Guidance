@@ -22,3 +22,4 @@ from .vaal import VAAL
 from .waal import WAAL
 
 from .new_minds import Minds
+from .my_minds import MyMinds
