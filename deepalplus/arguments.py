@@ -42,6 +42,8 @@ def get_args():
 	parser.add_argument('--num_vae_steps', type=int, default=2, help='Number of VAE steps taken for every task model step')
 	parser.add_argument('--adversary_param', type=float, default=1, help='Hyperparameter for training. lambda2 in the paper')
 
+	parser.add_argument('--REGL_factor', type=float, default=1.0, help='Hyperparameter for training. The factor for REGL or RLEGL')
+
 	
 	args = parser.parse_args()
 	return args

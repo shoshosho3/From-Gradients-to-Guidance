@@ -281,9 +281,9 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 	elif STRATEGY_NAME == 'LEGL' or STRATEGY_NAME == 'LEGL_0':
 		return LEGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'R-LEGL':
-		return RLEGL(dataset, net, args_input, args_task)
+		return RLEGL(dataset, net, args_input, args_task, args_input.REGL_factor)
 	elif STRATEGY_NAME == 'R-EGL':
-		return REGL(dataset, net, args_input, args_task)
+		return REGL(dataset, net, args_input, args_task, args_input.REGL_factor)
 	else:
 		raise NotImplementedError
 

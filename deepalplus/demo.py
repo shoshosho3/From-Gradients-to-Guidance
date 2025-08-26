@@ -30,6 +30,9 @@ NUM_ROUND = int(args_input.quota / args_input.batch)
 DATA_NAME = args_input.dataset_name
 STRATEGY_NAME = args_input.ALstrategy
 
+if args_input.ALstrategy == 'R-EGL' or args_input.ALstrategy == 'R-LEGL':
+    STRATEGY_NAME += '_' + str(args_input.REGL_factor)
+
 
 SEED = args_input.seed
 os.environ['TORCH_HOME'] = './basicmodel'
