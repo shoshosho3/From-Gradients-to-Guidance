@@ -47,7 +47,7 @@ class Net_LEGL:
         self.params = args_task
         self.device = device
         self.model = None
-        self.lambda_legl = 1 # Hyperparameter to balance the two losses
+        self.lambda_legl = 0.01 # Hyperparameter to balance the two losses
 
     def _create_model(self, data):
         if self.model is None:
