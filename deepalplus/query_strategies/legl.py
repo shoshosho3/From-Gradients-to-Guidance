@@ -73,22 +73,28 @@ class Net_LEGL:
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 
-                # Step 1: Forward pass for the whole batch
+                # --- FIX START: Perform a single forward pass for the entire batch ---
                 logits, predicted_norms = self.model(x)
-                loss_cls = F.cross_entropy(logits, y)
+                loss_cls = F.cross_entropy(logits, y) # This is the mean classification loss
 
-                # Step 2: Calculate ground-truth gradient norms (the meta-target)
+                # --- Step 2: Calculate ground-truth gradient norms (the meta-target) ---
                 true_norms = []
                 final_layer_params = list(self.model.classifier.parameters())
                 
+                # Loop over the results of the batch, not the model itself
                 for i in range(len(x)):
-                    # Need individual sample loss to compute per-sample gradients
-                    sample_logits, _ = self.model(x[i].unsqueeze(0))
+                    # Calculate the loss for this one sample using its pre-computed logit
+                    sample_logits = logits[i].unsqueeze(0)
                     sample_loss = F.cross_entropy(sample_logits, y[i].unsqueeze(0))
                     
+                    # Compute gradients of this single sample's loss w.r.t the final layer
                     grads = torch.autograd.grad(sample_loss, final_layer_params, retain_graph=True)
+                    
+                    # Flatten all gradients into a single vector and compute its norm
                     grad_vec = torch.cat([g.view(-1) for g in grads])
                     true_norms.append(grad_vec.norm())
+                
+                # --- FIX END ---
                 
                 true_norms_tensor = torch.stack(true_norms).to(self.device)
                 
