@@ -6,7 +6,6 @@ import torch.optim as optim
 from torchvision import models
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers.utils.import_utils import candidates
 
 from .strategy import Strategy
 
