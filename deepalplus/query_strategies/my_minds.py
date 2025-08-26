@@ -17,24 +17,28 @@ class Minds_Backend(nn.Module):
         weights = models.ResNet18_Weights.DEFAULT if pretrained else None
         backbone = models.resnet18(weights=weights)
         
-        # Adapt the model for different input channels (e.g., MNIST) or image sizes (e.g., CIFAR-10)
-        # This logic is inspired by the various Net classes in the framework's nets.py
-        if n_channels == 1:
-            # Adaptation for grayscale datasets like MNIST/PneumoniaMNIST.
-            # We replace the first conv layer to accept 1 channel and use a smaller kernel for smaller images.
-            backbone.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        else: # n_channels == 3
-            # Adaptation for small 32x32 images like CIFAR10. A less aggressive first layer is better.
-            backbone.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-            
-        # For small images, the original maxpool can be too aggressive. We keep it for consistency
-        # with CIFAR10_Net but could be replaced with nn.Identity() for further tuning.
+        # --- FIX START ---
+        # We use a more robust "adapter" pattern instead of modifying the ResNet's first layer.
+        # This 1x1 convolution will map the input channels (e.g., 1 for MNIST) to the
+        # 3 channels that the pretrained ResNet expects.
+        if n_channels != 3:
+            self.channel_adapter = nn.Conv2d(n_channels, 3, kernel_size=1)
+        else:
+            self.channel_adapter = nn.Identity() # If already 3 channels, do nothing.
         
+        # We now use the standard ResNet backbone without modification.
         self.features = nn.Sequential(*list(backbone.children())[:-1])
+        # --- FIX END ---
+        
         self.feature_dim = backbone.fc.in_features
         self.classifier = nn.Linear(self.feature_dim, num_classes)
         
     def forward(self, x):
+        # --- FIX START ---
+        # First, adapt the input channels to what ResNet expects.
+        x = self.channel_adapter(x)
+        # --- FIX END ---
+        
         f = self.features(x)
         embeddings = f.view(f.size(0), -1)
         logits = self.classifier(embeddings)
@@ -149,9 +153,9 @@ class Net_Minds:
         return self.model
 
 # This is the main Strategy class used by demo.py
-class MyMinds(Strategy):
+class Minds(Strategy):
     def __init__(self, dataset, net, args_input, args_task):
-        super(MyMinds, self).__init__(dataset, net, args_input, args_task)
+        super(Minds, self).__init__(dataset, net, args_input, args_task)
 
     def query(self, n):
         """
