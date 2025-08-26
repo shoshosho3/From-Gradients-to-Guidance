@@ -58,7 +58,13 @@ class Net_Minds:
     def _create_model(self, data):
         """Lazy model instantiation based on the input data's shape."""
         if self.model is None:
-            n_channels = data.X.shape[1]
+            # --- FIX START ---
+            # Get a single sample to correctly infer the number of channels after transforms.
+            # The raw data tensor (data.X) might not have the channel dimension, leading to errors.
+            first_x, _, _ = data[0] 
+            n_channels = first_x.shape[0] # Shape is (C, H, W), so we take the first dimension.
+            # --- FIX END ---
+            
             self.model = Minds_Backend(
                 num_classes=self.params['num_class'],
                 pretrained=self.params['pretrained'],
