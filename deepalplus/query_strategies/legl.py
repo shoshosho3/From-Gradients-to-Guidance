@@ -43,11 +43,11 @@ class LEGL_Backend(nn.Module):
 
 # Network handler for LEGL with a custom training loop.
 class Net_LEGL:
-    def __init__(self, args_task, device):
+    def __init__(self, args_task, device, lambda_legl=0.01):
         self.params = args_task
         self.device = device
         self.model = None
-        self.lambda_legl = 0.01 # Hyperparameter to balance the two losses
+        self.lambda_legl = lambda_legl # Hyperparameter to balance the two losses
 
     def _create_model(self, data):
         if self.model is None:
