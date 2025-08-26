@@ -77,6 +77,8 @@ while (iteration > 0):
         net = Net_EGL(args_task, device)
     elif args_input.ALstrategy == 'LEGL':
         net = Net_LEGL(args_task, device)
+    elif args_input.ALstrategy == 'LEGL_0':
+        net = Net_LEGL(args_task, device, lambda_legl=0.0)
     else:
         net = get_net(args_input.dataset_name, args_task, device)  # load network
     strategy = get_strategy(args_input.ALstrategy, dataset, net, args_input, args_task)  # load strategy
