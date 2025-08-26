@@ -6,6 +6,7 @@ import torch.optim as optim
 from torchvision import models
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from transformers.utils.import_utils import candidates
 
 from .strategy import Strategy
 
@@ -161,6 +162,38 @@ class Minds(Strategy):
     # --------- fix attempt ---------
     def query(self, n):
         """Query new points based on the predicted update magnitude."""
+
+        def filter_candidates(scores, method, n):
+            """
+                Filters the scores according to the given selection method.
+
+                Parameters:
+                - scores: list of tuples (score, index), sorted descending by score.
+                - method: tuple (method_name, param) specifying the selection strategy.
+                    * "trimmed_random": param is the fraction of lowest-scoring samples to discard (e.g., 0.1 = discard bottom 10%).
+                    * "top_n": param is ignored; the top `n` scores are selected.
+                    * "wide_random": param is a multiplier; selects the top (param * n) scores to form a candidate pool.
+                - n: number of points to ultimately sample.
+
+                Returns:
+                - A list of candidate scores according to the specified method.
+            """
+            method_name, param = method
+            if method_name == "trimmed_random":
+                # Discard trim of samples with the lowest scores
+                trim = param
+                discard = int(trim * len(scores))
+                return scores[:-discard] if discard > 0 else scores
+            elif method_name == "top_n":
+                # just the top n scores
+                return scores[:n] if n > 0 else scores
+            elif method_name == "wide_random":
+                # return the top factor*n scores
+                factor = param
+                return scores[:factor * n] if factor * n > 0 else scores
+            print("unknown method, using top_n")
+            return scores[:n] if n > 0 else scores
+
         unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
         
         # Use the network to get scores for all unlabeled points
@@ -177,6 +210,8 @@ class Minds(Strategy):
         
         return selected_indices
     
+
+
 
     def predict(self, data):
         """Make predictions using the trained model."""
