@@ -273,9 +273,9 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 		return Minds(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'MyMinds':
 		return MyMinds(dataset, net, args_input, args_task)
-	elif name == 'EGL':
+	elif STRATEGY_NAME == 'EGL':
 		return EGL(dataset, net, args_input, args_task)
-	elif name == 'LEGL':
+	elif STRATEGY_NAME == 'LEGL':
 		return LEGL(dataset, net, args_input, args_task)
 	else:
 		raise NotImplementedError
