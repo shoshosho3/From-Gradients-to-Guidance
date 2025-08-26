@@ -153,9 +153,9 @@ class Net_Minds:
         return self.model
 
 # This is the main Strategy class used by demo.py
-class Minds(Strategy):
+class MyMinds(Strategy):
     def __init__(self, dataset, net, args_input, args_task):
-        super(Minds, self).__init__(dataset, net, args_input, args_task)
+        super(MyMinds, self).__init__(dataset, net, args_input, args_task)
 
     def query(self, n):
         """
