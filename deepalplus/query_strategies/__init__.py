@@ -23,3 +23,6 @@ from .waal import WAAL
 
 from .new_minds import Minds
 from .my_minds import MyMinds
+
+from .egl import EGL
+from .legl import LEGL
