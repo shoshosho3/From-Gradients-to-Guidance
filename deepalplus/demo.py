@@ -73,9 +73,9 @@ while (iteration > 0):
         net = Net_Minds_New(args_task, device)
     elif args_input.ALstrategy == 'MyMinds':
         net = Net_Minds_My(args_task, device)
-    elif args_input.ALstrategy == 'EGL':
+    elif args_input.ALstrategy == 'EGL' or args_input.ALstrategy == 'R-EGL':
         net = Net_EGL(args_task, device)
-    elif args_input.ALstrategy == 'LEGL':
+    elif args_input.ALstrategy == 'LEGL' or args_input.ALstrategy == 'R-LEGL':
         net = Net_LEGL(args_task, device)
     elif args_input.ALstrategy == 'LEGL_0':
         net = Net_LEGL(args_task, device, lambda_legl=0.0)

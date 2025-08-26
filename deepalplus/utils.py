@@ -1,4 +1,7 @@
 from torchvision import transforms
+
+from deepalplus.query_strategies.egl import REGL
+from deepalplus.query_strategies.legl import RLEGL
 from handlers import MNIST_Handler, SVHN_Handler, CIFAR10_Handler, openml_Handler, MNIST_Handler_joint, SVHN_Handler_joint, CIFAR10_Handler_joint
 from data import get_MNIST, get_FashionMNIST, get_EMNIST, get_SVHN, get_CIFAR10, get_CIFAR10_imb, get_CIFAR100,  \
 								get_TinyImageNet, get_openml, get_BreakHis, get_PneumoniaMNIST, get_waterbirds
@@ -277,6 +280,10 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 		return EGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'LEGL' or STRATEGY_NAME == 'LEGL_0':
 		return LEGL(dataset, net, args_input, args_task)
+	elif STRATEGY_NAME == 'R-LEGL':
+		return RLEGL(dataset, net, args_input, args_task)
+	elif STRATEGY_NAME == 'R-EGL':
+		return REGL(dataset, net, args_input, args_task)
 	else:
 		raise NotImplementedError
 
