@@ -9,7 +9,7 @@ from query_strategies import RandomSampling, LeastConfidence, MarginSampling, En
 								LeastConfidenceDropout, MarginSamplingDropout, EntropySamplingDropout, \
 								KMeansSampling, KMeansSamplingGPU, KCenterGreedy, KCenterGreedyPCA, BALDDropout,  \
 								AdversarialBIM, AdversarialDeepFool, VarRatio, MeanSTD, BadgeSampling, CEALSampling, \
-								LossPredictionLoss, VAAL, WAAL, Minds, MyMinds
+								LossPredictionLoss, VAAL, WAAL, Minds, MyMinds, EGL, LEGL
 from parameters import *
 from torchvision import transforms
 import sys
@@ -273,6 +273,10 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 		return Minds(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'MyMinds':
 		return MyMinds(dataset, net, args_input, args_task)
+	elif name == 'EGL':
+		return EGL(dataset, net, args_input, args_task)
+	elif name == 'LEGL':
+		return LEGL(dataset, net, args_input, args_task)
 	else:
 		raise NotImplementedError
 

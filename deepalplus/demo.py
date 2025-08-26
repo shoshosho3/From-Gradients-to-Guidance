@@ -6,6 +6,8 @@ from utils import get_dataset, get_net, get_net_lpl, get_net_waal, get_strategy
 from pprint import pprint
 from query_strategies.new_minds import Net_Minds as Net_Minds_New
 from query_strategies.my_minds import Net_Minds as Net_Minds_My
+from query_strategies.egl import Net_EGL
+from query_strategies.legl import Net_LEGL
 
 torch.set_printoptions(profile='full')
 
@@ -71,6 +73,10 @@ while (iteration > 0):
         net = Net_Minds_New(args_task, device)
     elif args_input.ALstrategy == 'MyMinds':
         net = Net_Minds_My(args_task, device)
+    elif args_input.ALstrategy == 'EGL':
+        net = Net_EGL(args_task, device)
+    elif args_input.ALstrategy == 'LEGL':
+        net = Net_LEGL(args_task, device)
     else:
         net = get_net(args_input.dataset_name, args_task, device)  # load network
     strategy = get_strategy(args_input.ALstrategy, dataset, net, args_input, args_task)  # load strategy
