@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.models as models
 from tqdm import tqdm
+import random
 
 from .strategy import Strategy
 
@@ -150,3 +151,21 @@ class LEGL(Strategy):
         top_n_indices = scores.argsort(descending=True)[:n]
         
         return unlabeled_idxs[top_n_indices]
+
+# R-LEGL Strategy. Introduces randomness
+class RLEGL(Strategy):
+    def __init__(self, dataset, net, args_input, args_task, factor=5):
+        super(RLEGL, self).__init__(dataset, net, args_input, args_task)
+        self.factor = factor
+
+    def query(self, n):
+        unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
+
+        # Use the trained legl_head to predict informativeness scores.
+        scores = self.net.predict_legl_scores(unlabeled_data)
+
+        # Samples n from the top factor*n samples with the highest predicted scores.
+        candidates = scores.argsort(descending=True)[:self.factor*n]
+        selected = random.sample(candidates, n)
+
+        return unlabeled_idxs[selected]
