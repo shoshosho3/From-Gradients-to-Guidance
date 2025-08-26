@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.models as models
 from tqdm import tqdm
+import random
 
 from .strategy import Strategy
 
@@ -141,3 +142,25 @@ class EGL(Strategy):
         top_n_indices = scores.argsort()[-n:]
 
         return unlabeled_idxs[top_n_indices]
+
+
+# R-EGL Strategy. Introduces randomness
+class REGL(Strategy):
+    def __init__(self, dataset, net, args_input, args_task, factor=5):
+        super(REGL, self).__init__(dataset, net, args_input, args_task)
+        self.factor = factor
+
+    def query(self, n):
+        unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
+
+        # Calculate gradient embeddings at query time.
+        grad_embeddings = self.net.get_grad_embeddings(unlabeled_data)
+
+        # The score is the L2 norm of the gradient vector.
+        scores = np.linalg.norm(grad_embeddings, axis=1)
+
+        # Sample n from the top factor*n samples with the largest gradient lengths.
+        candidates = scores.argsort()[-1*self.factor*n:]
+        selected = random.sample(candidates, n)
+
+        return unlabeled_idxs[selected]

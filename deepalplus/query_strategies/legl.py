@@ -164,7 +164,7 @@ class RLEGL(Strategy):
         # Use the trained legl_head to predict informativeness scores.
         scores = self.net.predict_legl_scores(unlabeled_data)
 
-        # Query the top n samples with the highest predicted scores.
+        # Samples n from the top factor*n samples with the highest predicted scores.
         candidates = scores.argsort(descending=True)[:self.factor*n]
         selected = random.sample(candidates, n)
 
