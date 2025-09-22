@@ -161,6 +161,6 @@ class REGL(Strategy):
 
         # Sample n from the top factor*n samples with the largest gradient lengths.
         candidates = scores.argsort()[-1*int(self.factor)*n:]
-        selected = random.sample(candidates, n)
+        selected = random.sample(unlabeled_idxs[candidates], n)
 
-        return unlabeled_idxs[selected]
+        return selected
