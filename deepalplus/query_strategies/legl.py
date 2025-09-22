@@ -165,7 +165,7 @@ class RLEGL(Strategy):
         scores = self.net.predict_legl_scores(unlabeled_data)
 
         # Samples n from the top factor*n samples with the highest predicted scores.
-        candidates = scores.argsort(descending=True)[:self.factor*n]
+        candidates = scores.argsort(descending=True)[:int(self.factor)*n]
         selected = random.sample(candidates, n)
 
         return unlabeled_idxs[selected]

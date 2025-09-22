@@ -160,7 +160,7 @@ class REGL(Strategy):
         scores = np.linalg.norm(grad_embeddings, axis=1)
 
         # Sample n from the top factor*n samples with the largest gradient lengths.
-        candidates = scores.argsort()[-1*self.factor*n:]
+        candidates = scores.argsort()[-1*int(self.factor)*n:]
         selected = random.sample(candidates, n)
 
         return unlabeled_idxs[selected]
