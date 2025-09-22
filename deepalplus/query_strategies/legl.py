@@ -166,6 +166,6 @@ class RLEGL(Strategy):
 
         # Samples n from the top factor*n samples with the highest predicted scores.
         candidates = scores.argsort(descending=True)[:int(self.factor)*n]
-        selected = random.sample(unlabeled_idxs[candidates], n)
+        selected = np.random.choice(unlabeled_idxs[candidates], n, replace=False)
 
         return selected
