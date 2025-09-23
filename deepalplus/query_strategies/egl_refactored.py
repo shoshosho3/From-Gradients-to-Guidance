@@ -11,7 +11,10 @@ from .common_nets import StandardResNet18
 
 
 class Net_EGL(BaseNetHandler):
-    """Network handler for the EGL strategy."""
+    """
+    Network handler for the EGL strategy.
+    This version uses a vectorized approach for superior performance.
+    """
 
     def _get_model_instance(self, n_channels):
         """Returns an instance of the standard, adapted ResNet18."""
@@ -40,7 +43,11 @@ class Net_EGL(BaseNetHandler):
                 optimizer.step()
 
     def get_grad_embeddings(self, data):
-        """Calculates gradient embeddings using pseudo-labels (specific to EGL)."""
+        """
+        Calculates gradient embeddings using pseudo-labels.
+        This is a highly efficient, vectorized implementation of the EGL score calculation,
+        mathematically equivalent to the loop-based version in the original egl.py.
+        """
         self._check_and_create_model(data)
         self.model.eval()
 
@@ -49,23 +56,27 @@ class Net_EGL(BaseNetHandler):
         grad_embeddings = np.zeros([len(data), embDim * nLab])
         loader = DataLoader(data, shuffle=False, **self.params['loader_te_args'])
 
-        for x, y, idxs in loader:
-            x = x.to(self.device)
-            with torch.no_grad():
+        with torch.no_grad():
+            for x, y, idxs in loader:
+                x = x.to(self.device)
+
                 logits, embeddings = self.model(x)
 
-            probs = F.softmax(logits, dim=1)
-            max_probs, pred_labels = torch.max(probs, 1)
+                # Use argmax on logits for numerical stability and efficiency
+                pred_labels = torch.argmax(logits, dim=1)
+                probs = F.softmax(logits, dim=1)
 
-            # EGL calculation using matrix operations for efficiency
-            one_hot = F.one_hot(pred_labels, nLab)
-            diff = probs - one_hot
+                # EGL formula: G = flatten((P - Y_pseudo) ⨂ E)
+                # where P are probabilities, Y_pseudo is one-hot pseudo-label, E is embedding.
+                one_hot = F.one_hot(pred_labels, nLab)
+                diff = probs - one_hot  # Shape: (batch, nLab)
 
-            # Reshape for broadcasting: (batch, nLab, 1) * (batch, 1, embDim) -> (batch, nLab, embDim)
-            grad = diff.unsqueeze(2) * embeddings.unsqueeze(1)
+                # Perform outer product for each sample in the batch via broadcasting
+                # (batch, nLab, 1) * (batch, 1, embDim) -> (batch, nLab, embDim)
+                grad = diff.unsqueeze(2) * embeddings.unsqueeze(1)
 
-            # Flatten to (batch, nLab * embDim)
-            grad_embeddings[idxs] = grad.view(len(y), -1).cpu().numpy()
+                # Flatten to (batch, nLab * embDim) and store
+                grad_embeddings[idxs] = grad.view(len(y), -1).cpu().numpy()
 
         return grad_embeddings
 
@@ -74,6 +85,7 @@ class EGL(Strategy):
     def query(self, n):
         unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
         grad_embeddings = self.net.get_grad_embeddings(unlabeled_data)
+        # The score is the L2 norm of the gradient embedding vector.
         scores = np.linalg.norm(grad_embeddings, axis=1)
         top_n_indices = scores.argsort()[-n:]
         return unlabeled_idxs[top_n_indices]
@@ -89,8 +101,10 @@ class REGL(Strategy):
         grad_embeddings = self.net.get_grad_embeddings(unlabeled_data)
         scores = np.linalg.norm(grad_embeddings, axis=1)
 
+        # Create a candidate pool from the top-scoring samples.
         num_candidates = min(len(scores), int(self.factor * n))
         candidate_indices = scores.argsort()[-num_candidates:]
 
+        # Randomly select n samples from the candidate pool.
         selected_local_indices = np.random.choice(candidate_indices, n, replace=False)
         return unlabeled_idxs[selected_local_indices]
