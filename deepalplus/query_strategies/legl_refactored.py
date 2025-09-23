@@ -88,22 +88,36 @@ class Net_LEGL(BaseNetHandler):
         Calculates the true gradient norms for each sample in a batch using a
         highly efficient, vectorized approach.
         """
-        # The gradient of cross-entropy w.r.t the final layer weights is (P - Y_true) ⨂ E
-        # where P are probabilities, Y_true is one-hot true label, E is embedding.
         nLab = self.params['num_class']
         probs = F.softmax(logits, dim=1)
         one_hot = F.one_hot(y, nLab)
-        diff = probs - one_hot  # Shape: (batch, nLab)
+        diff = probs - one_hot
 
-        # Perform outer product via broadcasting to get per-sample gradients
-        # Shape: (batch, nLab, 1) * (batch, 1, emb_dim) -> (batch, nLab, emb_dim)
         grad_embeddings = diff.unsqueeze(2) * embeddings.unsqueeze(1)
-
-        # Calculate L2 norm of the flattened per-sample gradient vectors
-        # Reshape to (batch, nLab * emb_dim) and compute norm along the second dimension
         true_norms = torch.norm(grad_embeddings.view(len(y), -1), dim=1)
 
         return true_norms
+
+    # <<<<<<<<<<<<<<<< START: ADDED METHOD TO FIX THE BUG <<<<<<<<<<<<<<<<
+    def predict(self, data):
+        """
+        Overrides the base handler's predict method to correctly handle the
+        three-value return signature of LEGL_Backend's forward pass.
+        """
+        self._check_and_create_model(data)
+        self.model.eval()
+        preds = torch.zeros(len(data), dtype=data.Y.dtype)
+        loader = DataLoader(data, shuffle=False, **self.params['loader_te_args'])
+        with torch.no_grad():
+            for x, _, idxs in loader:
+                x = x.to(self.device)
+                # Correctly unpack three values, ignoring the last two
+                logits, _, _ = self.model(x)
+                pred = logits.max(1)[1]
+                preds[idxs] = pred.cpu()
+        return preds
+
+    # >>>>>>>>>>>>>>>> END: ADDED METHOD TO FIX THE BUG >>>>>>>>>>>>>>>>
 
     def predict_legl_scores(self, data):
         """Predicts informativeness scores using the trained LEGL head."""
@@ -123,7 +137,6 @@ class LEGL(Strategy):
     def query(self, n):
         unlabeled_idxs, unlabeled_data = self.dataset.get_unlabeled_data()
         scores = self.net.predict_legl_scores(unlabeled_data)
-        # BUG FIX: Convert tensor of indices to numpy to index the numpy array
         top_n_indices = scores.argsort(descending=True)[:n].cpu().numpy()
         return unlabeled_idxs[top_n_indices]
 
