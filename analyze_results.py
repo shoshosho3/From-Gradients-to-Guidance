@@ -68,6 +68,8 @@ def process_file(file_path):
         
     dataset = parts[0]
     al_method = parts[1]
+    if al_method == 'R-EGL' or al_method == 'R-LEGL':
+        al_method += f"_{parts[2]}" # Include the REGL_factor
 
     # 2. Parse file content for accuracy data
     data_points = []
