@@ -41,8 +41,7 @@ def get_args():
 	parser.add_argument('--num_adv_steps', type=int, default=1, help='Number of adversary steps taken for every task model step')
 	parser.add_argument('--num_vae_steps', type=int, default=2, help='Number of VAE steps taken for every task model step')
 	parser.add_argument('--adversary_param', type=float, default=1, help='Hyperparameter for training. lambda2 in the paper')
-
-        parser.add_argument('--LEGL_lambda', type=float, default=0.01, help='Hyperparameter for training. The parameter for LEGL, ex: 0.01,0.1,1')
+	parser.add_argument('--LEGL_lambda', type=float, default=0.01, help='Hyperparameter for training. The parameter for LEGL, ex: 0.01,0.1,1')
 	parser.add_argument('--REGL_factor', type=int, default=1, help='Hyperparameter for training. The factor for REGL or RLEGL, ex: 2,3,5')
 
 	
