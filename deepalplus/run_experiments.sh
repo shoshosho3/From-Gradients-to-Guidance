@@ -34,7 +34,7 @@ run_job() {
 
     # Execute the command in the background, redirecting stdout and stderr to the log file
     # The 'bash -c' structure ensures conda is activated for the command.
-    bash -c "conda activate $CONDA_ENV_NAME && $COMMAND_TO_RUN" > "$LOG_FILE" 2>&1 &
+    conda run -n "$CONDA_ENV_NAME" $PYTHON_COMMAND > "$LOG_FILE" 2>&1 &
 }
 
 # --- Main Job Queue ---
