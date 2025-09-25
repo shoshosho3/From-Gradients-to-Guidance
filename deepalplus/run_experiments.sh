@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # --- Configuration ---
+CONDA_ENV_NAME="deepAL"
 
 # creating a directory for log files if it doesn't exist
 LOG_DIR="experiment_logs"
@@ -25,13 +26,15 @@ run_job() {
     fi
 
     LOG_FILE="$LOG_DIR/${log_name}.log"
+    COMMAND_TO_RUN="python demo.py --ALstrategy $strategy --dataset_name $dataset --quota $quota --batch $batch --initseed $initseed --iteration 3 $extra_args"
 
     echo "--- Starting: ${log_name} ---"
-    echo "Full command: python demo.py --ALstrategy $strategy --dataset_name $dataset --quota $quota --batch $batch --initseed $initseed --iteration 3 $extra_args"
+    echo "Full command: $COMMAND_TO_RUN"
     echo "Logging output to: $LOG_FILE"
 
     # Execute the command in the background, redirecting stdout and stderr to the log file
-    python demo.py --ALstrategy "$strategy" --dataset_name "$dataset" --quota "$quota" --batch "$batch" --initseed "$initseed" --iteration 3 $extra_args > "$LOG_FILE" 2>&1 &
+    # The 'bash -c' structure ensures conda is activated for the command.
+    bash -c "conda activate $CONDA_ENV_NAME && $COMMAND_TO_RUN" > "$LOG_FILE" 2>&1 &
 }
 
 # --- Main Job Queue ---
@@ -50,7 +53,7 @@ run_job "LEGL"           "FashionMNIST" 10000 250 500 ""
 run_job "R-EGL"          "FashionMNIST" 10000 250 500 "--REGL_factor 2"
 run_job "R-EGL"          "FashionMNIST" 10000 250 500 "--REGL_factor 3"
 
-# Wait for all remaining background jobs to complete
+# waiting for all background jobs to complete
 wait
 
 echo "--- All experiments have finished. ---"
