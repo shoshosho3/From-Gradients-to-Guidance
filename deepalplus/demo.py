@@ -8,6 +8,8 @@ from query_strategies.new_minds import Net_Minds as Net_Minds_New
 from query_strategies.my_minds import Net_Minds as Net_Minds_My
 from query_strategies.egl_refactored import Net_EGL
 from query_strategies.legl_refactored import Net_LEGL
+from query_strategies.advanced_egl import Net_AdvancedEGL
+from query_strategies.advanced_legl import Net_AdvancedLEGL
 
 torch.set_printoptions(profile='full')
 
@@ -30,7 +32,9 @@ NUM_ROUND = int(args_input.quota / args_input.batch)
 DATA_NAME = args_input.dataset_name
 STRATEGY_NAME = args_input.ALstrategy
 
-if args_input.ALstrategy == 'R-EGL' or args_input.ALstrategy == 'R-LEGL':
+lamda_strategies = ['R-EGL', 'R-LEGL', 'DiversityEGL', 'DiversityLEGL']
+
+if args_input.ALstrategy in lamda_strategies:
     STRATEGY_NAME += '_' + str(args_input.REGL_factor)
 
 
@@ -82,6 +86,14 @@ while (iteration > 0):
         net = Net_LEGL(args_task, device, DATA_NAME, args_input.LEGL_lambda)
     elif args_input.ALstrategy == 'LEGL_0':
         net = Net_LEGL(args_task, device, DATA_NAME, 0)
+    elif args_input.ALstrategy == 'AdvancedEGL':
+        net = Net_AdvancedEGL(args_task, device, DATA_NAME)
+    elif args_input.ALstrategy == 'DiversityEGL':
+        net = Net_AdvancedEGL(args_task, device, DATA_NAME)
+    elif args_input.ALstrategy == 'AdvancedLEGL':
+        net = Net_AdvancedLEGL(args_task, device, DATA_NAME, args_input.LEGL_lambda)
+    elif args_input.ALstrategy == 'DiversityLEGL':
+        net = Net_AdvancedLEGL(args_task, device, DATA_NAME, args_input.LEGL_lambda)
     else:
         net = get_net(args_input.dataset_name, args_task, device)  # load network
     strategy = get_strategy(args_input.ALstrategy, dataset, net, args_input, args_task)  # load strategy
