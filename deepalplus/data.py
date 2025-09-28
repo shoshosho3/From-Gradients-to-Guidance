@@ -268,9 +268,9 @@ def get_PneumoniaMNIST(handler, args_task):
     X_te = X_te[idx_test]
     Y_te = Y_te[idx_test]
 
-    # convert labels to torch
-    Y_tr = torch.from_numpy(Y_tr).long()
-    Y_te = torch.from_numpy(Y_te).long()
+    # flatten labels and convert to torch
+    Y_tr = torch.from_numpy(Y_tr.reshape(-1)).long()
+    Y_te = torch.from_numpy(Y_te.reshape(-1)).long()
 
     return Data(X_tr, Y_tr, X_te, Y_te, handler, args_task)
 
