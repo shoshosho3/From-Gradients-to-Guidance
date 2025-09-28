@@ -170,8 +170,8 @@ while (iteration > 0):
 
 # cal mean & standard deviation
 acc_m = []
-file_name_res_tot = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_normal_res_tot.txt'
-file_res_tot = open(os.path.join(os.path.abspath('') + '/results', '%s' % file_name_res_tot), 'w')
+file_name_res_tot = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_' + str(args_input.seed) + '_normal_res_tot.txt'
+file_res_tot = open(os.path.join(os.path.abspath('') + '/new_results', '%s' % file_name_res_tot), 'w')
 
 file_res_tot.writelines('dataset: {}'.format(DATA_NAME) + '\n')
 file_res_tot.writelines('AL strategy: {}'.format(STRATEGY_NAME) + '\n')
@@ -198,8 +198,8 @@ file_res_tot.writelines('mean time: ' + str(mean_time) + '. std dev acc: ' + str
 
 # save result
 
-file_name_res = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_normal_res.txt'
-file_res = open(os.path.join(os.path.abspath('') + '/results', '%s' % file_name_res), 'w')
+file_name_res = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_' + str(args_input.seed) + '_normal_res.txt'
+file_res = open(os.path.join(os.path.abspath('') + '/new_results', '%s' % file_name_res), 'w')
 
 
 file_res.writelines('dataset: {}'.format(DATA_NAME) + '\n')
