@@ -148,7 +148,7 @@ class DiversityEGL(Strategy):
 
         # Clusters the candidate embeddings to find n diverse representatives
         # uses n_init='auto' to avoid future warnings in scikit-learn
-        kmeans = KMeans(n_clusters=n, n_init='auto', random_state=0)
+        kmeans = KMeans(n_clusters=n, n_init=10, random_state=0)
         kmeans.fit(candidate_embeddings)
 
         # Selects the one sample from the candidate pool closest to each cluster centroid

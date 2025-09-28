@@ -109,7 +109,7 @@ class Net_AdvancedLEGL(BaseNetHandler):
 
                     # Target is 1 if score_i > score_j, -1 if score_i < score_j
                     target = torch.sign(true_i - true_j)
-                    loss_reg = F.margin_ranking_loss(pred_i, pred_j, target, margin=0.1)
+                    loss_reg = F.margin_ranking_loss(pred_i.squeeze(), pred_j.squeeze(), target, margin=0.1)
                 else:  # 'mse'
                     loss_reg = F.mse_loss(predicted_scores.squeeze(), true_scores.detach())
 
@@ -217,7 +217,7 @@ class DiversityLEGL(Strategy):
 
         # clusters the candidate embeddings to find n diverse representatives
         # uses n_init='auto' to avoid future warnings in scikit-learn
-        kmeans = KMeans(n_clusters=n, n_init='auto', random_state=0)
+        kmeans = KMeans(n_clusters=n, n_init=10, random_state=0)
         kmeans.fit(candidate_embeddings)
 
         # selects the one sample from the candidate pool closest to each cluster centroid
