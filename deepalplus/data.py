@@ -274,6 +274,65 @@ def get_PneumoniaMNIST(handler, args_task):
 
     return Data(X_tr, Y_tr, X_te, Y_te, handler, args_task)
 
+def get_waterbirds(handler, args_task):
+    import wilds
+    from torchvision import transforms
+    dataset = wilds.get_dataset(dataset='waterbirds', root_dir='./data/waterbirds', download='True')
+    trans = transforms.Compose([transforms.Resize([255,255])])
+    train = dataset.get_subset(split = 'train',transform = trans)
+    test = dataset.get_subset(split = 'test', transform = trans)
+
+    len_train = train.metadata_array.shape[0]
+    len_test = test.metadata_array.shape[0]
+    X_tr = []
+    Y_tr = []
+    X_te = []
+    Y_te = []
+
+    count1 = 0
+    count2 = 0
+    count3 = 0
+    count4 = 0
+    f = open('waterbirds.txt', 'w')
+
+    for i in range(len_train):
+        x,y,meta = train.__getitem__(i)
+        img = np.array(x)
+        X_tr.append(img)
+        Y_tr.append(y)
+
+    for i in range(len_test):
+        x,y, meta = test.__getitem__(i)
+        img = np.array(x)
+
+        X_te.append(img)
+        Y_te.append(y)
+        if meta[0] == 0 and meta[1] == 0:
+            f.writelines('1') #landbird_background:land
+            f.writelines('\n')
+            count1 = count1 + 1
+        elif meta[0] == 1 and meta[1] == 0:
+            f.writelines('2') #landbird_background:water
+            count2 = count2 + 1
+            f.writelines('\n')
+        elif meta[0] == 0 and meta[1] == 1:
+            f.writelines('3') #waterbird_background:land
+            f.writelines('\n')
+            count3 = count3 + 1
+        elif meta[0] == 1 and meta[1] == 1:
+            f.writelines('4') #waterbird_background:water
+            f.writelines('\n')
+            count4 = count4 + 1
+        else:
+            raise NotImplementedError
+    f.close()
+
+    Y_tr = torch.tensor(Y_tr)
+    Y_te = torch.tensor(Y_te)
+    X_tr = np.array(X_tr)
+    X_te = np.array(X_te)
+    return Data(X_tr, Y_tr, X_te, Y_te, handler, args_task)
+
 
 
 
