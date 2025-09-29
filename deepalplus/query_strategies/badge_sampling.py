@@ -34,29 +34,49 @@ class BadgeSampling(Strategy):
 
 # kmeans ++ initialization
 def init_centers(X, K):
-    ind = np.argmax([np.linalg.norm(s, 2) for s in X])
-    mu = [X[ind]]
-    indsAll = [ind]
-    centInds = [0.] * len(X)
-    cent = 0
-    print('#Samps\tTotal Distance')
-    while len(mu) < K:
-        if len(mu) == 1:
-            D2 = pairwise_distances(X, mu).ravel().astype(float)
-        else:
-            newD = pairwise_distances(X, [mu[-1]]).ravel().astype(float)
-            for i in range(len(X)):
-                if D2[i] >  newD[i]:
-                    centInds[i] = cent
-                    D2[i] = newD[i]
-        print(str(len(mu)) + '\t' + str(sum(D2)), flush=True)
-        if sum(D2) == 0.0: pdb.set_trace()
-        D2 = D2.ravel().astype(float)
-        Ddist = (D2 ** 2)/ sum(D2 ** 2)
-        customDist = stats.rv_discrete(name='custm', values=(np.arange(len(D2)), Ddist))
-        ind = customDist.rvs(size=1)[0]
-        while ind in indsAll: ind = customDist.rvs(size=1)[0]
-        mu.append(X[ind])
-        indsAll.append(ind)
-        cent += 1
-    return indsAll
+    """
+    A fast, vectorized implementation of k-means++ initialization.
+
+    Parameters
+    ----------
+    X : np.ndarray, shape (n_samples, n_features)
+        The data to choose centers from.
+    K : int
+        The number of centers to choose.
+
+    Returns
+    -------
+    list
+        A list of indices of the chosen centers.
+    """
+    # Ensure X is a 2D numpy array
+    X = np.asarray(X)
+    n_samples = X.shape[0]
+
+    # Choose the first center: the point furthest from the origin.
+    norms = np.linalg.norm(X, axis=1)
+    first_center_idx = np.argmax(norms)
+
+    centers_indices = [first_center_idx]
+
+    # Keep track of the squared distance from each point to its nearest center.
+    closest_dist_sq = pairwise_distances(X, X[first_center_idx:first_center_idx + 1], metric='euclidean') ** 2
+    closest_dist_sq = closest_dist_sq.ravel()
+
+    # Iteratively choose the remaining K-1 centers.
+    for _ in range(1, K):
+        # Calculate the sampling probabilities proportional to the squared distances.
+        # This is the core of k-means++.
+        probs = closest_dist_sq / np.sum(closest_dist_sq)
+
+        next_center_idx = np.random.choice(n_samples, p=probs)
+        centers_indices.append(next_center_idx)
+
+        # Calculate distances to the *newest* center.
+        dist_to_new_center_sq = pairwise_distances(X, X[next_center_idx:next_center_idx + 1], metric='euclidean') ** 2
+        dist_to_new_center_sq = dist_to_new_center_sq.ravel()
+
+        # Update the closest distance for each point by taking the minimum.
+        closest_dist_sq = np.minimum(closest_dist_sq, dist_to_new_center_sq)
+
+    return centers_indices
