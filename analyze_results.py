@@ -62,12 +62,13 @@ def process_file(file_path):
     # 1. Extract metadata from the filename
     # e.g., MNIST_LEGL_250_500_10000_normal_res_tot.txt
     parts = filename.split('_')
-    if len(parts) < 2:
+    if len(parts) < 6:
         print(f"Warning: Skipping malformed filename: {filename}")
         return None
         
     dataset = parts[0]
     al_method = parts[1]
+    seed = parts[5]
     if al_method == 'R-EGL' or al_method == 'R-LEGL':
         al_method += f"_{parts[2]}" # Include the REGL_factor
 
@@ -103,7 +104,8 @@ def process_file(file_path):
         'dataset': dataset,
         'method': al_method,
         'AUBC': aubc,
-        'F-acc': final_accuracy
+        'F-acc': final_accuracy,
+        'seed': seed
     }
 
 def main():
@@ -149,6 +151,9 @@ def main():
 
     # Use pandas to create and format the summary table
     df = pd.DataFrame(all_results)
+
+    # averaging over seeds if multiple seeds exist for the same (dataset, method)
+    df = df.groupby(['dataset', 'method']).agg({'AUBC': 'mean', 'F-acc': 'mean'}).reset_index()
     
     # Pivot the table to get the desired structure:
     # Rows: AL methods
