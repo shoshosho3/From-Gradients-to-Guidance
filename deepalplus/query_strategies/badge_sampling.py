@@ -4,6 +4,7 @@ from .strategy import Strategy
 from scipy import stats
 from sklearn.metrics import pairwise_distances
 import pdb
+from tqdm import tqdm
 
 '''
 This implementation is originated from https://github.com/JordanAsh/badge.
@@ -64,7 +65,7 @@ def init_centers(X, K):
     closest_dist_sq = closest_dist_sq.ravel()
 
     # Iteratively choose the remaining K-1 centers.
-    for _ in range(1, K):
+    for _ in tqdm(range(1, K), desc="Selecting centers with k-means++"):
         # Calculate the sampling probabilities proportional to the squared distances.
         # This is the core of k-means++.
         probs = closest_dist_sq / np.sum(closest_dist_sq)
