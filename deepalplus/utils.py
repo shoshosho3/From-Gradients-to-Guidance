@@ -2,6 +2,7 @@ from torchvision import transforms
 
 from query_strategies.egl_refactored import EGL, REGL
 from query_strategies.legl_refactored import LEGL, RLEGL
+from query_strategies.vanilla_egl import VanillaEGL
 from query_strategies.advanced_legl import AdvancedLEGL, DiversityLEGL
 from query_strategies.advanced_egl import AdvancedEGL, DiversityEGL
 from handlers import MNIST_Handler, SVHN_Handler, CIFAR10_Handler, openml_Handler, MNIST_Handler_joint, SVHN_Handler_joint, CIFAR10_Handler_joint
@@ -286,6 +287,8 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 		return RLEGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'R-EGL':
 		return REGL(dataset, net, args_input, args_task)
+	elif STRATEGY_NAME == 'VanillaEGL':
+		return VanillaEGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'AdvancedEGL':
 		return AdvancedEGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'DiversityEGL':

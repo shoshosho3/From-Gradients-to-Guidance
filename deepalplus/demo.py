@@ -10,6 +10,7 @@ from query_strategies.egl_refactored import Net_EGL
 from query_strategies.legl_refactored import Net_LEGL
 from query_strategies.advanced_egl import Net_AdvancedEGL
 from query_strategies.advanced_legl import Net_AdvancedLEGL
+from query_strategies.vanilla_egl import Net_VanillaEGL
 
 torch.set_printoptions(profile='full')
 
@@ -86,6 +87,8 @@ while (iteration > 0):
         net = Net_LEGL(args_task, device, DATA_NAME, args_input.LEGL_lambda)
     elif args_input.ALstrategy == 'LEGL_0':
         net = Net_LEGL(args_task, device, DATA_NAME, 0)
+    elif args_input.ALstrategy == 'VanillaEGL':
+        net = Net_VanillaEGL(args_task, device, DATA_NAME)
     elif args_input.ALstrategy == 'AdvancedEGL':
         net = Net_AdvancedEGL(args_task, device, DATA_NAME)
     elif args_input.ALstrategy == 'DiversityEGL':
