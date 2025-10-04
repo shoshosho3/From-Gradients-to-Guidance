@@ -1,21 +1,16 @@
 from torchvision import transforms
-
-from query_strategies.egl_refactored import EGL, REGL
-from query_strategies.legl_refactored import LEGL, RLEGL
-from query_strategies.vanilla_egl import VanillaEGL
-from query_strategies.advanced_legl import AdvancedLEGL, DiversityLEGL
-from query_strategies.advanced_egl import AdvancedEGL, DiversityEGL
 from handlers import MNIST_Handler, SVHN_Handler, CIFAR10_Handler, openml_Handler, MNIST_Handler_joint, SVHN_Handler_joint, CIFAR10_Handler_joint
 from data import get_MNIST, get_FashionMNIST, get_EMNIST, get_SVHN, get_CIFAR10, get_CIFAR10_imb, get_CIFAR100,  \
 								get_TinyImageNet, get_openml, get_BreakHis, get_PneumoniaMNIST, get_waterbirds
 from nets import Net, MNIST_Net, CIFAR10_Net, openml_Net, PneumoniaMNIST_Net, waterbirds_Net, get_net_vae
 from nets_lossprediction import Net_LPL, MNIST_Net_LPL, CIFAR10_Net_LPL, PneumoniaMNIST_Net_LPL, waterbirds_Net_LPL, get_lossnet
 from nets_waal import Net_WAAL, MNIST_Net_WAAL, CIFAR10_Net_WAAL, waterbirds_Net_WAAL, CLF_WAAL, Discriminator
-from query_strategies import RandomSampling, LeastConfidence, MarginSampling, EntropySampling, \
+from query_strategies import (RandomSampling, LeastConfidence, MarginSampling, EntropySampling, \
 								LeastConfidenceDropout, MarginSamplingDropout, EntropySamplingDropout, \
 								KMeansSampling, KMeansSamplingGPU, KCenterGreedy, KCenterGreedyPCA, BALDDropout,  \
 								AdversarialBIM, AdversarialDeepFool, VarRatio, MeanSTD, BadgeSampling, CEALSampling, \
-								LossPredictionLoss, VAAL, WAAL, Minds, MyMinds
+								LossPredictionLoss, VAAL, WAAL, Minds, MyMinds, VanillaEGL, AdvancedEGL, \
+                                DiversityEGL, AdvancedLEGL, DiversityLEGL)
 from parameters import *
 from torchvision import transforms
 import sys
@@ -279,14 +274,6 @@ def get_strategy(STRATEGY_NAME, dataset, net, args_input, args_task):
 		return Minds(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'MyMinds':
 		return MyMinds(dataset, net, args_input, args_task)
-	elif STRATEGY_NAME == 'EGL':
-		return EGL(dataset, net, args_input, args_task)
-	elif STRATEGY_NAME == 'LEGL' or STRATEGY_NAME == 'LEGL_0':
-		return LEGL(dataset, net, args_input, args_task)
-	elif STRATEGY_NAME == 'R-LEGL':
-		return RLEGL(dataset, net, args_input, args_task)
-	elif STRATEGY_NAME == 'R-EGL':
-		return REGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'VanillaEGL':
 		return VanillaEGL(dataset, net, args_input, args_task)
 	elif STRATEGY_NAME == 'AdvancedEGL':
