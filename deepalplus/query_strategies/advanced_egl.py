@@ -39,6 +39,11 @@ class Net_AdvancedEGL(BaseNetHandler):
 
         for epoch in tqdm(range(1, self.params['n_epoch'] + 1), ncols=100, desc="Training AdvancedEGL"):
             for _, (x, y, idxs) in enumerate(loader):
+
+                # skips batches with 1 or 0 samples to avoid BatchNorm error during training.
+                if x.shape[0] <= 1:
+                    continue
+
                 x, y = x.to(self.device), y.to(self.device)
                 optimizer.zero_grad()
                 logits, _ = self.model(x)
