@@ -27,6 +27,12 @@ class BaseDiversityStrategy(Strategy):
         """
         raise NotImplementedError
 
+    def _select_candidates(self, scores, num_candidates):
+        """
+        This method exists for reproducibility purposes. It is overridable by child classes.
+        """
+        return scores.argsort()[-num_candidates:]
+
     def _get_candidate_pool(self, unlabeled_idxs, scores, embeddings, n):
         """
         Filters the top candidates based on scores to form a candidate pool.
@@ -37,7 +43,7 @@ class BaseDiversityStrategy(Strategy):
         :return: A tuple of (candidate_embeddings, candidate_global_idxs).
         """
         num_candidates = min(len(scores), int(self.candidate_factor * n))
-        candidate_local_indices = scores.argsort()[-num_candidates:]
+        candidate_local_indices = self._select_candidates(scores, num_candidates)
         candidate_embeddings = embeddings[candidate_local_indices]
         candidate_global_idxs = unlabeled_idxs[candidate_local_indices]
         return candidate_embeddings, candidate_global_idxs

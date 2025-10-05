@@ -245,3 +245,9 @@ class DiversityLEGL(BaseDiversityStrategy):
     def _get_scores_and_embeddings(self, unlabeled_data):
         """Implements the required method to fetch scores and embeddings."""
         return self.net.predict_scores_and_embeddings(unlabeled_data)
+
+    def _select_candidates(self, scores, num_candidates):
+        """
+        This function exists for reproducibility purposes, the sorting is slightly different
+        """
+        return scores.argsort(descending=True)[:num_candidates].cpu().numpy()
