@@ -1,4 +1,6 @@
-# An Empirical Study of EGL-based Active Learning Strategies
+# From Gradients to Guidance: Extending and Formalizing Expected
+Gradient Length
+## An Empirical Study of EGL-based Active Learning Strategies
 
 **Course:** Data Analysis and Presentation – Final Project
 
