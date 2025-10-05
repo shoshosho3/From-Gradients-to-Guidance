@@ -8,6 +8,12 @@ class BaseNetHandler(ABC):
     Encapsulates common logic like model creation, prediction, and evaluation.
     """
     def __init__(self, args_task, device, dataset_name):
+        """
+        Initializes the BaseNetHandler.
+        :param args_task: Task-specific arguments.
+        :param device: Computation device
+        :param dataset_name: Name of the dataset being used.
+        """
         self.params = args_task
         self.device = device
         self.dataset_name = dataset_name
@@ -18,7 +24,10 @@ class BaseNetHandler(ABC):
         raise NotImplementedError
 
     def _check_and_create_model(self, data):
-        """Handles the boilerplate of model creation."""
+        """
+        Checks if the model is instantiated; if not, creates it based on input data dimensions.
+        :param data: The dataset to infer input dimensions from.
+        """
         if self.model is None:
             first_x, _, _ = data[0]
             n_channels = first_x.shape[0]
@@ -30,7 +39,11 @@ class BaseNetHandler(ABC):
         pass
 
     def predict(self, data):
-        """Generic prediction logic for classification."""
+        """
+        Generic prediction logic for classification.
+        :param data: The dataset to predict on.
+        :return: Tensor of predicted class labels.
+        """
         self._check_and_create_model(data)
         self.model.eval()
         preds = torch.zeros(len(data), dtype=data.Y.dtype)
@@ -38,11 +51,14 @@ class BaseNetHandler(ABC):
         with torch.no_grad():
             for x, _, idxs in loader:
                 x = x.to(self.device)
-                # Assumes the first return value is logits
                 logits, _ = self.model(x)
                 pred = logits.max(1)[1]
                 preds[idxs] = pred.cpu()
         return preds
 
     def get_model(self):
+        """
+        Returns the instantiated model.
+        :return: The model instance.
+        """
         return self.model
