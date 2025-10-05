@@ -6,8 +6,9 @@ from utils import get_dataset, get_net, get_net_lpl, get_net_waal, get_strategy
 from pprint import pprint
 from query_strategies.new_minds import Net_Minds as Net_Minds_New
 from query_strategies.my_minds import Net_Minds as Net_Minds_My
-from query_strategies.egl import Net_EGL
-from query_strategies.legl import Net_LEGL
+from query_strategies.advanced_egl import Net_AdvancedEGL
+from query_strategies.advanced_legl import Net_AdvancedLEGL
+from query_strategies.vanilla_egl import Net_VanillaEGL
 
 torch.set_printoptions(profile='full')
 
@@ -29,6 +30,11 @@ NUM_INIT_LB = args_input.initseed
 NUM_ROUND = int(args_input.quota / args_input.batch)
 DATA_NAME = args_input.dataset_name
 STRATEGY_NAME = args_input.ALstrategy
+
+lamda_strategies = ['R-EGL', 'R-LEGL', 'DiversityEGL', 'DiversityLEGL']
+
+if args_input.ALstrategy in lamda_strategies:
+    STRATEGY_NAME += '_' + str(args_input.REGL_factor)
 
 
 SEED = args_input.seed
@@ -73,10 +79,16 @@ while (iteration > 0):
         net = Net_Minds_New(args_task, device)
     elif args_input.ALstrategy == 'MyMinds':
         net = Net_Minds_My(args_task, device)
-    elif args_input.ALstrategy == 'EGL':
-        net = Net_EGL(args_task, device)
-    elif args_input.ALstrategy == 'LEGL':
-        net = Net_LEGL(args_task, device)
+    elif args_input.ALstrategy == 'VanillaEGL':
+        net = Net_VanillaEGL(args_task, device, DATA_NAME)
+    elif args_input.ALstrategy == 'AdvancedEGL':
+        net = Net_AdvancedEGL(args_task, device, DATA_NAME)
+    elif args_input.ALstrategy == 'DiversityEGL':
+        net = Net_AdvancedEGL(args_task, device, DATA_NAME)
+    elif args_input.ALstrategy == 'AdvancedLEGL':
+        net = Net_AdvancedLEGL(args_task, device, DATA_NAME, args_input.LEGL_lambda)
+    elif args_input.ALstrategy == 'DiversityLEGL':
+        net = Net_AdvancedLEGL(args_task, device, DATA_NAME, args_input.LEGL_lambda)
     else:
         net = get_net(args_input.dataset_name, args_task, device)  # load network
     strategy = get_strategy(args_input.ALstrategy, dataset, net, args_input, args_task)  # load strategy
@@ -153,8 +165,8 @@ while (iteration > 0):
 
 # cal mean & standard deviation
 acc_m = []
-file_name_res_tot = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_normal_res_tot.txt'
-file_res_tot = open(os.path.join(os.path.abspath('') + '/results', '%s' % file_name_res_tot), 'w')
+file_name_res_tot = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_' + str(args_input.seed) + '_normal_res_tot.txt'
+file_res_tot = open(os.path.join(os.path.abspath('') + '/new_results', '%s' % file_name_res_tot), 'w')
 
 file_res_tot.writelines('dataset: {}'.format(DATA_NAME) + '\n')
 file_res_tot.writelines('AL strategy: {}'.format(STRATEGY_NAME) + '\n')
@@ -181,8 +193,8 @@ file_res_tot.writelines('mean time: ' + str(mean_time) + '. std dev acc: ' + str
 
 # save result
 
-file_name_res = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_normal_res.txt'
-file_res = open(os.path.join(os.path.abspath('') + '/results', '%s' % file_name_res), 'w')
+file_name_res = DATA_NAME + '_' + STRATEGY_NAME + '_' + str(NUM_QUERY) + '_' + str(NUM_INIT_LB) + '_' + str(args_input.quota) + '_' + str(args_input.seed) + '_normal_res.txt'
+file_res = open(os.path.join(os.path.abspath('') + '/new_results', '%s' % file_name_res), 'w')
 
 
 file_res.writelines('dataset: {}'.format(DATA_NAME) + '\n')

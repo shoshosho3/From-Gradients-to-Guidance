@@ -24,5 +24,6 @@ from .waal import WAAL
 from .new_minds import Minds
 from .my_minds import MyMinds
 
-from .egl import EGL
-from .legl import LEGL
+from .vanilla_egl import VanillaEGL
+from .advanced_egl import AdvancedEGL, DiversityEGL
+from .advanced_legl import AdvancedLEGL, DiversityLEGL

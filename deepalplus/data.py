@@ -236,70 +236,43 @@ def get_BreakHis(handler, args_task):
     return Data(X_tr, Y_tr, X_te, Y_te, handler, args_task)
 
 def get_PneumoniaMNIST(handler, args_task):
-    # download data from https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia and unzip it in data/PhwumniaMNIST/
+    import numpy as np
+    import torch
+    import random
     import cv2
 
-    data_train_dir = './data/PneumoniaMNIST/chest_xray/train/'
-    data_test_dir = './data/PneumoniaMNIST/chest_xray/test/'
-    assert os.path.exists(data_train_dir)
-    assert os.path.exists(data_test_dir)
+    # load npz file
+    data = np.load("./data/pneumoniamnist.npz")
+    print(data.files)  # e.g. ['train_images', 'train_labels', 'test_images', 'test_labels']
 
-    #train data
-    train_imgs_path_0 = [data_train_dir+'NORMAL/'+f for f in os.listdir(data_train_dir+'/NORMAL/')]
-    train_imgs_path_1 = [data_train_dir+'PNEUMONIA/'+f for f in os.listdir(data_train_dir+'/PNEUMONIA/')]
-    train_imgs_0 = []
-    train_imgs_1 = []
-    for p in train_imgs_path_0:
-        im = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
-        im = cv2.resize(im, (224, 224))
-        train_imgs_0.append(im)
-    for p in train_imgs_path_1:
-        im = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
-        im = cv2.resize(im, (224, 224))
-        train_imgs_1.append(im)
-    train_labels_0 = np.zeros(len(train_imgs_0))
-    train_labels_1 = np.ones(len(train_imgs_1))
-    X_tr = []
-    Y_tr = []
-    train_imgs = train_imgs_0 + train_imgs_1
-    train_labels = np.concatenate((train_labels_0, train_labels_1))
-    idx_train = list(range(len(train_imgs)))
+    # extract arrays
+    X_tr = data['train_images']
+    Y_tr = data['train_labels']
+    X_te = data['test_images']
+    Y_te = data['test_labels']
+
+    # resize to 224x224 (keep grayscale)
+    X_tr = np.array([cv2.resize(img, (224, 224)) for img in X_tr])
+    X_te = np.array([cv2.resize(img, (224, 224)) for img in X_te])
+
+    # shuffle
+    idx_train = list(range(len(X_tr)))
     random.seed(4666)
     random.shuffle(idx_train)
-    X_tr = [train_imgs[i] for i in idx_train]
-    Y_tr = [train_labels[i] for i in idx_train]
-    X_tr = np.array(X_tr)
-    Y_tr = torch.from_numpy(np.array(Y_tr)).long()
+    X_tr = X_tr[idx_train]
+    Y_tr = Y_tr[idx_train]
 
-    #test data
-    test_imgs_path_0 = [data_test_dir+'NORMAL/'+f for f in os.listdir(data_test_dir+'/NORMAL/')]
-    test_imgs_path_1 = [data_test_dir+'PNEUMONIA/'+f for f in os.listdir(data_test_dir+'/PNEUMONIA/')]
-    test_imgs_0 = []
-    test_imgs_1 = []
-    for p in test_imgs_path_0:
-        im = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
-        im = cv2.resize(im, (224, 224))
-        test_imgs_0.append(im)
-    for p in test_imgs_path_1:
-        im = cv2.imread(p, cv2.IMREAD_GRAYSCALE)
-        im = cv2.resize(im, (224, 224))
-        test_imgs_1.append(im)
-    test_labels_0 = np.zeros(len(test_imgs_0))
-    test_labels_1 = np.ones(len(test_imgs_1))
-    X_te = []
-    Y_te = []
-    test_imgs = test_imgs_0 + test_imgs_1
-    test_labels = np.concatenate((test_labels_0, test_labels_1))
-    idx_test = list(range(len(test_imgs)))
+    idx_test = list(range(len(X_te)))
     random.seed(4666)
     random.shuffle(idx_test)
-    X_te = [test_imgs[i] for i in idx_test]
-    Y_te = [test_labels[i] for i in idx_test]
-    X_te = np.array(X_te)
-    Y_te = torch.from_numpy(np.array(Y_te)).long()
+    X_te = X_te[idx_test]
+    Y_te = Y_te[idx_test]
+
+    # flatten labels and convert to torch
+    Y_tr = torch.from_numpy(Y_tr.reshape(-1)).long()
+    Y_te = torch.from_numpy(Y_te.reshape(-1)).long()
 
     return Data(X_tr, Y_tr, X_te, Y_te, handler, args_task)
-
 
 def get_waterbirds(handler, args_task):
     import wilds
@@ -351,7 +324,7 @@ def get_waterbirds(handler, args_task):
             f.writelines('\n')
             count4 = count4 + 1
         else:
-            raise NotImplementedError    
+            raise NotImplementedError
     f.close()
 
     Y_tr = torch.tensor(Y_tr)
