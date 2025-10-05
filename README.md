@@ -23,7 +23,6 @@ The heart of this project is a set of new, modular Python files that implement t
 .
 ├── analyze_results.py          # Script to analyze and plot results
 ├── updated_environment.yml             # Conda environment file
-├── run_experiments.sh          # Master script to run all experiments
 ├── deepalplus/                 # Original DeepAL+ codebase with our modifications
 │   ├── query_strategies/       # Directory containing our new strategy files
 │   │   ├── vanilla_egl.py
@@ -34,6 +33,7 @@ The heart of this project is a set of new, modular Python files that implement t
 │   │   ├── common_nets.py
 │   │   ├── common_strategies.py
 │   │   └── egl_entropy_utils.py
+|   ├── run_experiments.sh          # Master script to run all experiments
 │   └── new_results/            # (Generated) Directory for experiment log files
 └── ...                         # Other DeepAL+ files
 ```
