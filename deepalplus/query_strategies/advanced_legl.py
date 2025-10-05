@@ -250,4 +250,4 @@ class DiversityLEGL(BaseDiversityStrategy):
         """
         This function exists for reproducibility purposes, the sorting is slightly different
         """
-        return scores.argsort(descending=True)[:num_candidates].cpu().numpy()
+        return (-scores).argsort()[:num_candidates]
