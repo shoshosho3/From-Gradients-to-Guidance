@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
-
+import torch
 from .strategy import Strategy
 
 class BaseDiversityStrategy(Strategy):
@@ -44,7 +44,10 @@ class BaseDiversityStrategy(Strategy):
         """
         num_candidates = min(len(scores), int(self.candidate_factor * n))
         candidate_local_indices = self._select_candidates(scores, num_candidates)
-        candidate_embeddings = embeddings[candidate_local_indices]
+        if torch.is_tensor(embeddings):
+            candidate_embeddings = embeddings[candidate_local_indices].cpu().numpy()
+        else:
+            candidate_embeddings = embeddings[candidate_local_indices]
         candidate_global_idxs = unlabeled_idxs[candidate_local_indices]
         return candidate_embeddings, candidate_global_idxs
 

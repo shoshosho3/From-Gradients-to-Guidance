@@ -220,7 +220,7 @@ class Net_AdvancedLEGL(BaseNetHandler):
                 _, pred_scores, embeddings = self.model(x)
                 scores[idxs] = pred_scores.squeeze().cpu()
                 all_embeddings[idxs] = embeddings.cpu()
-        return scores.numpy(), all_embeddings.numpy()
+        return scores, all_embeddings
 
 
 class AdvancedLEGL(Strategy):
@@ -250,4 +250,4 @@ class DiversityLEGL(BaseDiversityStrategy):
         """
         This function exists for reproducibility purposes, the sorting is slightly different
         """
-        return (-scores).argsort()[:num_candidates]
+        return scores.argsort(descending=True)[:num_candidates].cpu().numpy()
